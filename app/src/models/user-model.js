@@ -19,7 +19,7 @@ password: {
     type: Number,
     default: 0,
     validate(val) {
-      if (this.age < 0) throw new Error("Age must be positive number");
+      if (val < 0) throw new Error("Age must be positive number");
     },
   },
   email: {
