@@ -7,7 +7,6 @@ const Task = require("../src/models/task-model.js");
 const app = express();
 app.use(express.json());
 
-// app.get("", )
 mongoose.connect("mongodb://localhost:27017/my-project-api");
 
 app.post("/users", async (req, res) => {
@@ -16,14 +15,13 @@ app.post("/users", async (req, res) => {
     console.log(user);
     await user.save();
     res.status(201).send(user);
-    // .then((result) => res.send(user))
-    // .catch((err) => console.log(err));
+   
   } catch (err) {
     console.log(err);
   }
 });
 
-app.post("/task", (req, res) => {
+app.post("/task", async (req, res) => {
   // const task = new Task({
   //     title: "Doctors Appointment",
   //     description: "Go to the doctor for check up.                         ",
@@ -32,73 +30,76 @@ app.post("/task", (req, res) => {
 
   try {
     const task = new Task(req.body);
-    task
-      .save()
-      .then((result) => res.send(task))
-      .catch((err) => console.log(err));
+    const newTask =  await task.save()
+    if(!newTask){
+      return res.status(400).send({msg: " something went wrong, try again"})
+    }
+    res.send(newTask)
+
   } catch (err) {
     console.log(err);
     res.status(500).send("Server error");
   }
 });
 
-app.get("/users", (req, res) => {
-  // find all the usera
-  User.find({})
-    .then((users) => {
-      res.send(users);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
+app.get("/users", async (req, res) => {
+  // find all the users
+  try{
+    const users = await User.find({})
+    if(!users){
+      return res.status(404).json({message :"No Users found"})
+    }
+    res.send(users)
+  }
+  catch(err){
+    res.status(500).send(err);
+  }
+ 
 });
 //  id is a params an dis written with :
-app.get("/users/:id", (req, res) => {
+app.get("/users/:id", async (req, res) => {
   try {
-    const _id = req.params.id;
-    User.findById(_id)
-      .then((user) => {
-        if (!user) {
-          return res.status(404);
-        }
-        res.send(user);
-      })
-      .catch((er) => {
-        console.log(er);
-      });
+    // const _id = req.params.id;
+    const foundUser = await User.findById(req.params.id)
+    if(!foundUser){
+      console.log("user not found");
+      return res.status(404);
+    }
+     res.send(foundUser);
+  
   } catch (err) {
     console.log(err);
     res.status(500).send({ msg: "internal server error" });
   }
 });
 
-app.get("/tasks", (req, res) => {
-  Task.find({})
-    .then((tasks) => {
-      res.send(tasks);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
+app.get("/tasks", async (req, res) => {
+  try{
+    const tasks =  await Task.find({})
+    if(!tasks){
+      return res.status(404).send({msg: "not found"})
+    }
+    res.send(tasks)
+  }
+  catch(err){
+    console.log(err);
+    res.status(500).send({ msg: "internal server error" });
+  }
+
 });
 
-app.get("/tasks/:id",async (req, res) => {
-  try{
-   const taskId = req.params.id;
-  Task.findById(taskId)
-    .then((task) => {
-      if (!task) {
-        return res.status(404);
-      }
-      res.send(task);
-    })
-    .catch((err) => console.log(err));
-
-  }catch(err){
+app.get("/tasks/:id", async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const foundTask = await Task.findById(taskId);
+    if (!foundTask) {
+      return res.status(404).send({ msg: "not found" });
+    }
+    res.send(foundTask);
+  } catch (err) {
     console.log(err);
-    res.status(500).send({msg: "server error"})
+    res.status(500).send({ msg: "server error" });
   }
-  
 });
 
 app.patch("/users/:id", async (req, res) => {
