@@ -4,6 +4,7 @@ const User = require("./models/user-model");
 const mongoose = require("mongoose");
 const Task = require("../src/models/task-model.js");
 const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 const router = new express.Router()
 const userRouter = require("./routers/user.js")
@@ -34,3 +35,13 @@ mongoose.connect("mongodb://localhost:27017/my-project-api");
 app.listen(PORT, () => {
   console.log("running on port :", PORT);
 });
+
+
+// const ex = async () =>{
+//   const token = jwt.sign({_id: "kuku12"}, "secretkeyLL")
+//   console.log(token);
+//   const data = jwt.verify(token, "secretkeyLL")
+//   console.log(data);
+
+// }
+// ex()
